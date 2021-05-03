@@ -8,8 +8,9 @@ locals {
 }
 
 provider "google" {
-  version = "~> 3.42.0"
-  region = var.region
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }
 
 data "google_client_config" "default" {}
@@ -111,6 +112,10 @@ variable "ip_range_services" {
 
 variable "compute_engine_service_account" {
   description = "Service account to associate to the nodes in the cluster"
+}
+
+variable "zone" {
+  description = "The zone will be used to choose the default location for zonal resources."
 }
 
 output "kubernetes_endpoint" {
