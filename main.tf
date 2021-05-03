@@ -3,6 +3,7 @@ terraform {
   # terraform init -backend-config=backend.hcl
   backend "remote" {}
 }
+
 locals {
   cluster_type = "deploy-service"
 }
@@ -81,6 +82,51 @@ resource "kubernetes_service" "nginx-example" {
     module.gke]
 }
 
+resource "kubernetes_pod" "demo" {
+  metadata {
+    name = "demo"
+
+    labels = {
+      maintained_by = "terraform"
+      app = "demo"
+    }
+  }
+
+  spec {
+    container {
+      image = "${var.image_name}:${var.image_version}"
+      name = "demo"
+    }
+  }
+
+  depends_on = [
+    module.gke]
+}
+
+resource "kubernetes_service" "demo" {
+  metadata {
+    name = "demo"
+  }
+
+  spec {
+    selector = {
+      app = kubernetes_pod.demo.metadata[0].labels.app
+    }
+
+    session_affinity = "ClientIP"
+
+    port {
+      port = 8000
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
+
+  depends_on = [
+    module.gke]
+}
+
 variable "project_id" {
   description = "The project ID to host the cluster in"
 }
@@ -116,6 +162,14 @@ variable "compute_engine_service_account" {
 
 variable "zone" {
   description = "The zone will be used to choose the default location for zonal resources."
+}
+
+variable "image_name" {
+  description = "Demo image name"
+}
+
+variable "image_version" {
+  description = "Demo image version"
 }
 
 output "kubernetes_endpoint" {
