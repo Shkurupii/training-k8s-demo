@@ -9,8 +9,8 @@ locals {
 
 provider "google" {
   project = var.project_id
-  region  = var.region
-  zone    = var.zone
+  region = var.region
+  zone = var.zone
 }
 
 data "google_client_config" "default" {}
@@ -130,6 +130,7 @@ output "client_token" {
 
 output "ca_certificate" {
   value = module.gke.ca_certificate
+  sensitive = true
 }
 
 output "service_account" {
