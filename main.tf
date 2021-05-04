@@ -84,7 +84,7 @@ resource "kubernetes_service" "nginx-example" {
     module.gke]
 }
 
-resource "kubernetes_pod" "demo" {
+resource "kubernetes_deployment" "demo" {
   metadata {
     name = "demo"
 
@@ -95,12 +95,28 @@ resource "kubernetes_pod" "demo" {
   }
 
   spec {
-    container {
-      image = "${var.image_name}:${var.image_version}"
-      name = "demo"
+    replicas = 9
+
+    selector {
+      match_labels = {
+        app = "demo"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "demo"
+        }
+      }
+      spec {
+        container {
+          image = "${var.image_name}:${var.image_version}"
+          name = "demo"
+        }
+      }
     }
   }
-
   depends_on = [
     module.gke]
 }
@@ -112,7 +128,7 @@ resource "kubernetes_service" "demo" {
 
   spec {
     selector = {
-      app = kubernetes_pod.demo.metadata[0].labels.app
+      app = kubernetes_deployment.demo.metadata[0].labels.app
     }
 
     session_affinity = "ClientIP"
@@ -193,3 +209,4 @@ output "service_account" {
   description = "The default service account used for running nodes."
   value = module.gke.service_account
 }
+
