@@ -131,7 +131,7 @@ resource "kubernetes_service" "demo" {
       app = kubernetes_deployment.demo.metadata[0].labels.app
     }
 
-    session_affinity = "ClientIP"
+    session_affinity = "None"
 
     port {
       port = 80
